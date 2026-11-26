@@ -37,10 +37,10 @@ You need [Node.js](https://nodejs.org) and a free [Cloudflare](https://dash.clou
 git clone <this repo> && cd Playlist-widget
 npx wrangler login
 npx wrangler kv namespace create TOKENS     # copy the id it prints into wrangler.toml
-# also paste your playlist ID into wrangler.toml
 
 npx wrangler secret put SPOTIFY_CLIENT_ID
 npx wrangler secret put SPOTIFY_CLIENT_SECRET
+npx wrangler secret put PLAYLIST_ID
 npx wrangler secret put ADD_KEY             # make up a long random password, e.g. from a password manager
 
 npx wrangler deploy
@@ -108,7 +108,7 @@ You should hear "Added *Song* by *Artist*."
 |---|---|
 | "Wrong or missing key." | The `?key=` part of the URL doesn't match your `ADD_KEY`. |
 | "Spotify isn't connected yet…" | Open the `/login?key=…` link from step 4 again. |
-| "Spotify wouldn't let me change that playlist…" | Check the playlist ID in `wrangler.toml`, and that you own the playlist. |
+| "Spotify wouldn't let me change that playlist…" | Re-run `npx wrangler secret put PLAYLIST_ID` with the right ID, and make sure you own the playlist. |
 | Siri says "You need to unlock your iPhone first" | Turn on **Allow Siri When Locked** (step C), and re-run step B. |
 | Siri starts a web search instead | Rename the shortcut to something more distinctive, like "Add Song To Road Trip". |
 

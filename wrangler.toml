@@ -10,10 +10,8 @@ binding = "TOKENS"
 id = "PASTE_KV_NAMESPACE_ID_HERE"
 
 [vars]
-# The playlist to add songs to (the ID from its share link).
-PLAYLIST_ID = "PASTE_PLAYLIST_ID_HERE"
 # Set to "false" to allow adding the same song twice.
 SKIP_DUPLICATES = "true"
 
 # Secrets (set with `npx wrangler secret put NAME`, never put them in this file):
-#   SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, ADD_KEY
+#   SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, ADD_KEY, PLAYLIST_ID

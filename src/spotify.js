@@ -135,6 +135,7 @@ export async function addCurrentSong(env, store, fetchImpl = fetch) {
   if (!track) return "Nothing is playing on Spotify right now.";
 
   const playlistId = env.PLAYLIST_ID;
+  if (!playlistId) throw new UserFacingError("No playlist is set up yet. Run: npx wrangler secret put PLAYLIST_ID");
   if (env.SKIP_DUPLICATES !== "false" && (await playlistContains(token, playlistId, track.uri, fetchImpl))) {
     return `${describe(track)} is already in your playlist.`;
   }
