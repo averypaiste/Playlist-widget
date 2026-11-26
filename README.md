@@ -66,27 +66,53 @@ Test it: play a song, then open `…/add?key=YOUR_ADD_KEY`. The song should appe
 
 ## On your phone
 
-### iPhone: Shortcut + Siri + lock-screen widget + CarPlay
-1. Open **Shortcuts** and tap **+**. Name it **Save This Song**.
-2. Add the **Get Contents of URL** action:
-   - URL: `https://playlist-widget.yourname.workers.dev/add`
-   - Method: **POST**
-   - Headers: add `Authorization` = `Bearer YOUR_ADD_KEY`
-3. Add the **Speak Text** action. It speaks the output of *Get Contents of URL*.
-4. Optional, for a silent version: also add **Show Notification** with that same output.
+### iPhone (about 5 minutes)
 
-Now you can use it any of these ways:
-- **Voice (best while driving):** *"Hey Siri, Save This Song."* This works from the lock screen
-  and through CarPlay.
-- **Lock-screen widget:** long-press the lock screen, then **Customize → Lock Screen → add widget →
-  Shortcuts**, and pick *Save This Song*.
-- **Action Button** (iPhone 15 Pro and later): Settings → Action Button → Shortcut → *Save This Song*.
-- **Back Tap:** Settings → Accessibility → Touch → Back Tap → Double Tap → *Save This Song*.
+#### A. Build the shortcut
+1. Open the **Shortcuts** app and tap **+** (top right).
+2. Tap the name at the top, choose **Rename**, and type **Save This Song**. Siri listens for this
+   name, so keep it short and easy to say.
+3. Tap **Add Action**, search for **Get Contents of URL**, and tap it.
+4. Tap the blue **URL** placeholder and paste your full link, key included:
+   `https://playlist-widget.yourname.workers.dev/add?key=YOUR_ADD_KEY`
+   Leave **Method** set to **GET**. You don't need headers.
+5. Tap the search bar at the bottom, add **Speak Text**, and check that it says
+   *Speak **Contents of URL***. If it shows something else, tap that word and pick
+   *Contents of URL*.
+6. Tap **Done**.
 
-To run it without unlocking, go to **Settings → Face ID & Passcode** and check that **Siri** is
-allowed when locked.
+#### B. Run it once by hand (important)
+Play a song in Spotify, then tap the shortcut in the Shortcuts app. The first time, iPhone asks
+**"Allow 'Save This Song' to connect to playlist-widget…workers.dev?"**. Tap **Always Allow**.
+If you skip this, the question will pop up the first time you use it while driving.
+You should hear "Added *Song* by *Artist*."
 
-### Android: home-screen widget + Google Assistant
+#### C. Make it work without unlocking
+- **Settings → Apple Intelligence & Siri** (or **Siri**): turn on **Allow Siri When Locked**.
+- **Settings → General → CarPlay → your car**: make sure Siri is on. CarPlay speaks the result
+  through the car speakers.
+
+#### D. Pick your triggers
+- 🗣️ **Voice, best while driving:** *"Hey Siri, Save This Song."* This works with the phone locked,
+  in a mount, and through CarPlay. You can also press and hold the car's steering-wheel voice
+  button and say "Save This Song."
+- 🔒 **Lock-screen widget:** touch and hold the lock screen → **Customize** → **Lock Screen** →
+  tap the widget area → **Shortcuts** → pick *Save This Song*. Tap it to run, no unlock needed.
+- 🔘 **Action Button** (iPhone 15 Pro and later): **Settings → Action Button** → swipe to
+  **Shortcut** → *Save This Song*. Press and hold the button to save the song.
+- 👆 **Back Tap** (any recent iPhone): **Settings → Accessibility → Touch → Back Tap → Double Tap**
+  → *Save This Song*. Double-tap the back of the phone.
+
+#### If something goes wrong
+| You hear / see | Fix |
+|---|---|
+| "Wrong or missing key." | The `?key=` part of the URL doesn't match your `ADD_KEY`. |
+| "Spotify isn't connected yet…" | Open the `/login?key=…` link from step 4 again. |
+| "Spotify wouldn't let me change that playlist…" | Check the playlist ID in `wrangler.toml`, and that you own the playlist. |
+| Siri says "You need to unlock your iPhone first" | Turn on **Allow Siri When Locked** (step C), and re-run step B. |
+| Siri starts a web search instead | Rename the shortcut to something more distinctive, like "Add Song To Road Trip". |
+
+### Android (if you ever switch)
 1. Install **HTTP Shortcuts** (free, from the Play Store).
 2. Create a new shortcut named **Save This Song**:
    - Method **POST**, URL `https://playlist-widget.yourname.workers.dev/add`
