@@ -94,13 +94,14 @@ test("refuses podcasts", async () => {
     "GET /v1/me/player/currently-playing": () => json({ currently_playing_type: "episode", item: { uri: "spotify:episode:x" } }),
   }));
   const res = await handle(req("/add?key=k3y"), makeEnv(), fetchImpl);
-  assert.equal(res.status, 409);
+  assert.equal(res.status, 200, "every expected outcome is a 200 so Shortcuts speaks it");
+  assert.equal(await res.text(), "That's not a song, so I can't add it to the playlist.");
 });
 
 test("tells you to log in when Spotify isn't connected", async () => {
   const { fetchImpl } = fakeSpotify(baseRoutes());
   const res = await handle(req("/add?key=k3y"), makeEnv(new MemoryKV()), fetchImpl);
-  assert.equal(res.status, 409);
+  assert.equal(res.status, 200);
   assert.match(await res.text(), /isn't connected/);
 });
 
@@ -176,6 +177,6 @@ test("accepts a pasted Spotify playlist link", async () => {
 test("says so when no playlist matches the name", async () => {
   const { fetchImpl } = fakeSpotify(baseRoutes(myPlaylists));
   const res = await handle(req("/add?key=k3y&playlist=workout"), makeEnv(), fetchImpl);
-  assert.equal(res.status, 409);
+  assert.equal(res.status, 200);
   assert.equal(await res.text(), "I couldn't find a playlist of yours called workout.");
 });

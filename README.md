@@ -121,6 +121,7 @@ Names ignore capitals and punctuation, and a partial name works ("road" finds "R
 | "Spotify isn't connected yet…" | Open the `/login?key=…` link from step 4 again. |
 | "I couldn't find a playlist of yours called …" | Say the name the way it's spelled in Spotify, or use a shorter part of it. |
 | "Spotify wouldn't let me change that playlist…" | Re-run `npx wrangler secret put PLAYLIST_ID` with the right ID, and make sure you own the playlist. |
+| "No default playlist is set up yet." | Run `npx wrangler secret put PLAYLIST_ID`, or add `&playlist=` with a name to the link. |
 | Siri says "You need to unlock your iPhone first" | Turn on **Allow Siri When Locked** (step C), and re-run step B. |
 | Siri starts a web search instead | Rename the shortcut to something more distinctive, like "Add Song To Road Trip". |
 
