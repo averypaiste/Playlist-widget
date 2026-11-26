@@ -53,7 +53,7 @@ export async function handle(request, env, fetchImpl = fetch) {
 
   if (url.pathname === "/add" && (request.method === "GET" || request.method === "POST")) {
     try {
-      return text(await addCurrentSong(env, store, fetchImpl));
+      return text(await addCurrentSong(env, store, fetchImpl, url.searchParams.get("playlist")));
     } catch (err) {
       if (err instanceof UserFacingError) return text(err.message, 409);
       console.error(err);

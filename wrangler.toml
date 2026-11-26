@@ -7,7 +7,7 @@ compatibility_date = "2026-11-01"
 # then paste the id it prints below.
 [[kv_namespaces]]
 binding = "TOKENS"
-id = "PASTE_KV_NAMESPACE_ID_HERE"
+id = "0dac2216f0a14a3ba4ebb638c3afaaba"
 
 [vars]
 # Set to "false" to allow adding the same song twice.

@@ -125,19 +125,72 @@ function describe(track) {
   return artists ? `${track.name} by ${artists}` : track.name;
 }
 
+const normalize = (s) => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
+
+/** Accepts a playlist ID, a Spotify playlist link, or null (use the default). */
+function playlistIdFrom(value) {
+  const link = value.match(/playlist[/:]([A-Za-z0-9]{22})/);
+  if (link) return link[1];
+  if (/^[A-Za-z0-9]{22}$/.test(value)) return value;
+  return null;
+}
+
 /**
- * Add whatever is playing right now to the configured playlist.
- * Returns a short sentence suitable for Siri / Google Assistant to speak.
+ * Find one of the user's own playlists by (spoken) name.
+ * Tries an exact match, then "starts with", then "contains", ignoring case and punctuation.
  */
-export async function addCurrentSong(env, store, fetchImpl = fetch) {
+async function findPlaylistByName(token, name, fetchImpl) {
+  const wanted = normalize(name);
+  if (!wanted) return null;
+  const meRes = await api(token, "/me", fetchImpl);
+  if (!meRes.ok) throw new Error(`Couldn't read your Spotify profile (${meRes.status})`);
+  const me = await meRes.json();
+
+  const owned = [];
+  let url = "/me/playlists?limit=50";
+  for (let page = 0; url && page < 20; page++) {
+    const res = await api(token, url, fetchImpl);
+    if (!res.ok) throw new Error(`Couldn't list your playlists (${res.status})`);
+    const data = await res.json();
+    for (const p of data.items || []) {
+      if (p && p.owner && p.owner.id === me.id) owned.push(p);
+    }
+    url = data.next;
+  }
+  const n = (p) => normalize(p.name || "");
+  return (
+    owned.find((p) => n(p) === wanted) ||
+    owned.find((p) => n(p).startsWith(wanted)) ||
+    owned.find((p) => n(p).includes(wanted)) ||
+    null
+  );
+}
+
+async function resolvePlaylist(env, token, requested, fetchImpl) {
+  const value = (requested || "").trim();
+  if (!value) {
+    if (!env.PLAYLIST_ID) throw new UserFacingError("No playlist is set up yet. Run: npx wrangler secret put PLAYLIST_ID");
+    return { id: env.PLAYLIST_ID, label: "your playlist" };
+  }
+  const id = playlistIdFrom(value);
+  if (id) return { id, label: "that playlist" };
+  const found = await findPlaylistByName(token, value, fetchImpl);
+  if (!found) throw new UserFacingError(`I couldn't find a playlist of yours called ${value}.`);
+  return { id: found.id, label: found.name };
+}
+
+/**
+ * Add whatever is playing right now to a playlist: the default PLAYLIST_ID, or `requested`
+ * (a playlist name, ID or link). Returns a short sentence for Siri / Google Assistant to speak.
+ */
+export async function addCurrentSong(env, store, fetchImpl = fetch, requested = null) {
   const token = await getAccessToken(env, store, fetchImpl);
   const track = await getCurrentTrack(token, fetchImpl);
   if (!track) return "Nothing is playing on Spotify right now.";
 
-  const playlistId = env.PLAYLIST_ID;
-  if (!playlistId) throw new UserFacingError("No playlist is set up yet. Run: npx wrangler secret put PLAYLIST_ID");
+  const { id: playlistId, label } = await resolvePlaylist(env, token, requested, fetchImpl);
   if (env.SKIP_DUPLICATES !== "false" && (await playlistContains(token, playlistId, track.uri, fetchImpl))) {
-    return `${describe(track)} is already in your playlist.`;
+    return `${describe(track)} is already in ${label}.`;
   }
 
   const res = await api(token, `/playlists/${encodeURIComponent(playlistId)}/items`, fetchImpl, {
@@ -150,5 +203,5 @@ export async function addCurrentSong(env, store, fetchImpl = fetch) {
     }
     throw new Error(`Couldn't add the song (${res.status}): ${await res.text()}`);
   }
-  return `Added ${describe(track)}.`;
+  return requested && requested.trim() ? `Added ${describe(track)} to ${label}.` : `Added ${describe(track)}.`;
 }

@@ -136,3 +136,46 @@ test("login redirects to Spotify and callback saves the refresh token", async ()
   const replay = await handle(req(`/callback?code=c0de&state=${state}`), makeEnv(kv), fetchImpl);
   assert.equal(replay.status, 400, "state can only be used once");
 });
+
+const myPlaylists = {
+  "GET /v1/me": () => json({ id: "me" }),
+  "GET /v1/me/playlists": () => json({
+    items: [
+      { id: "someoneElses", name: "Road Trip", owner: { id: "other" } },
+      { id: "rt", name: "Road Trip!! 2026", owner: { id: "me" } },
+      { id: "chill", name: "Chill", owner: { id: "me" } },
+    ],
+    next: null,
+  }),
+};
+
+test("picks one of your playlists by spoken name, ignoring case and punctuation", async () => {
+  const { fetchImpl, calls } = fakeSpotify(baseRoutes({
+    ...myPlaylists,
+    "GET /v1/playlists/rt/items": () => json({ items: [], next: null }),
+    "POST /v1/playlists/rt/items": () => json({ snapshot_id: "s" }, 201),
+  }));
+  const res = await handle(req("/add?key=k3y&playlist=road%20trip"), makeEnv(), fetchImpl);
+  assert.equal(await res.text(), "Added Song A by Band to Road Trip!! 2026.");
+  assert.ok(calls.some((c) => c.key === "POST /v1/playlists/rt/items"));
+  assert.ok(!calls.some((c) => c.key === "POST /v1/playlists/pl1/items"));
+});
+
+test("accepts a pasted Spotify playlist link", async () => {
+  const id = "37i9dQZF1DXcBWIGoYBM5M";
+  const { fetchImpl, calls } = fakeSpotify(baseRoutes({
+    [`GET /v1/playlists/${id}/items`]: () => json({ items: [], next: null }),
+    [`POST /v1/playlists/${id}/items`]: () => json({ snapshot_id: "s" }, 201),
+  }));
+  const link = encodeURIComponent(`https://open.spotify.com/playlist/${id}?si=xyz`);
+  const res = await handle(req(`/add?key=k3y&playlist=${link}`), makeEnv(), fetchImpl);
+  assert.equal(res.status, 200);
+  assert.ok(calls.some((c) => c.key === `POST /v1/playlists/${id}/items`));
+});
+
+test("says so when no playlist matches the name", async () => {
+  const { fetchImpl } = fakeSpotify(baseRoutes(myPlaylists));
+  const res = await handle(req("/add?key=k3y&playlist=workout"), makeEnv(), fetchImpl);
+  assert.equal(res.status, 409);
+  assert.equal(await res.text(), "I couldn't find a playlist of yours called workout.");
+});

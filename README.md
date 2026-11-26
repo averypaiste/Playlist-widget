@@ -103,11 +103,23 @@ You should hear "Added *Song* by *Artist*."
 - 👆 **Back Tap** (any recent iPhone): **Settings → Accessibility → Touch → Back Tap → Double Tap**
   → *Save This Song*. Double-tap the back of the phone.
 
+#### More than one playlist
+Add `&playlist=` and a playlist **name** to the link (or a playlist link/ID). You must own the playlist.
+Names ignore capitals and punctuation, and a partial name works ("road" finds "Road Trip 2026").
+
+- **One shortcut per playlist:** duplicate *Save This Song*, rename the copy (e.g. **Save To Chill**),
+  and change its URL to `…/add?key=YOUR_ADD_KEY&playlist=Chill`.
+- **One shortcut that asks you:** before *Get Contents of URL*, add **Ask for Input** (Prompt:
+  "Which playlist?"). Then in the URL, put `&playlist=` and insert the **Provided Input** variable
+  after it. Say *"Hey Siri, Save This Song"*, and Siri will ask which playlist. Say its name.
+  Leave the URL without `&playlist=` in your original shortcut to keep using your default.
+
 #### If something goes wrong
 | You hear / see | Fix |
 |---|---|
 | "Wrong or missing key." | The `?key=` part of the URL doesn't match your `ADD_KEY`. |
 | "Spotify isn't connected yet…" | Open the `/login?key=…` link from step 4 again. |
+| "I couldn't find a playlist of yours called …" | Say the name the way it's spelled in Spotify, or use a shorter part of it. |
 | "Spotify wouldn't let me change that playlist…" | Re-run `npx wrangler secret put PLAYLIST_ID` with the right ID, and make sure you own the playlist. |
 | Siri says "You need to unlock your iPhone first" | Turn on **Allow Siri When Locked** (step C), and re-run step B. |
 | Siri starts a web search instead | Rename the shortcut to something more distinctive, like "Add Song To Road Trip". |
