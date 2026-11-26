@@ -1,0 +1,19 @@
+name = "playlist-widget"
+main = "src/worker.js"
+compatibility_date = "2026-11-01"
+
+# Stores your Spotify login. Create it with:
+#   npx wrangler kv namespace create TOKENS
+# then paste the id it prints below.
+[[kv_namespaces]]
+binding = "TOKENS"
+id = "PASTE_KV_NAMESPACE_ID_HERE"
+
+[vars]
+# The playlist to add songs to (the ID from its share link).
+PLAYLIST_ID = "PASTE_PLAYLIST_ID_HERE"
+# Set to "false" to allow adding the same song twice.
+SKIP_DUPLICATES = "true"
+
+# Secrets (set with `npx wrangler secret put NAME`, never put them in this file):
+#   SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, ADD_KEY

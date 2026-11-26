@@ -1,0 +1,11 @@
+{
+  "name": "playlist-widget",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "One-tap / voice 'add this song to my playlist' for Spotify, for use while driving.",
+  "scripts": {
+    "test": "node --test",
+    "deploy": "wrangler deploy"
+  }
+}
